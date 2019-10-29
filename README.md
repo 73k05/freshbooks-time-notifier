@@ -10,3 +10,7 @@ Change your smtp and client parameters in timechecker.py.
 Use crontab to call this script everytime you want to send your client a notification. I call it every saturday to summerize the week.
 
 Every 12h the access token will expire but it doesn't matter as long as the script renew the token with the refresh token before sending the request and save new tokens for next request in a file.
+
+`tail -f output.txt ` to see logs
+
+`cat token` to see saved tokens
