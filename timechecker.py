@@ -73,11 +73,6 @@ def save_token_to_file(token_access, token_refresh):
 		token_file.write(token_access+"\n")
 		token_file.write(token_refresh)
 
-# Parameter check
-# if len(sys.argv) < 3:
-# 	write_output_to_file("Missing parameters, usage: `$ python3.7 timechecker.py <client_id> <client_secret> [<code>]`")
-# 	exit()
-
 # Get a real consumer key & secret from:
 freshbooks_config = config_json["freshbooks"]
 freshbooks = OAuth2Service(
@@ -117,8 +112,8 @@ token = 'Bearer '+token_access
 write_output_to_file("Access TOKEN: "+token_access)
 write_output_to_file("Refresh TOKEN: "+token_refresh)
 
-# Work of the day last 24h
-dt = datetime.datetime.today() - datetime.timedelta(1)
+# Work of the day until cron is triggered
+dt = datetime.datetime.today()# - datetime.timedelta(1)
 dt_string = dt.strftime("%Y-%m-%d")
 
 # Replace <businessId> <client-id>
