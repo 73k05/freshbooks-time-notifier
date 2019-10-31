@@ -145,5 +145,7 @@ write_output_to_file("TOTAL:"+str(total_hours_logged))
 body += "</ul>"
 body += "TOTAL: "+str(total_hours_logged)+"H<br/>"
 
+body += "<br/>CoDialement<br/>Olivier"
+
 if total_hours_logged > 0:
 	send_mail(body)
