@@ -139,7 +139,7 @@ body += "<ul>"
 for entry in res.json()["time_entries"]:
 	duration = str(round(entry["duration"]/3600,2))
 	write_output_to_file(entry["note"]+": "+duration+"h")
-	body += "<li>["+duration+"h] "+entry["note"]+"</li>"
+	body += "<li>["+entry["started_at"]+"]["+duration+"h] "+entry["note"]+"</li>"
 
 write_output_to_file("TOTAL:"+str(total_hours_logged))
 body += "</ul>"
