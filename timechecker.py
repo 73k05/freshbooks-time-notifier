@@ -29,6 +29,7 @@ def send_mail(body):
 	sender_email_to_display = email_config["senderEmailToDisplay"]
 	receiver_email = email_config["receiverEmail"]
 	cc_email = email_config["ccEmail"]
+	bcc_email = email_config["bccEmail"]
 	password = email_config["password"]
 
 	# Email content
@@ -39,7 +40,10 @@ def send_mail(body):
 	message["From"] = "73kBot <"+sender_email_to_display+">"
 	message["To"] = receiver_email
 	message['Cc'] = cc_email
+	message['Bcc'] = bcc_email
 	message["Subject"] = subject
+
+	toaddrs = [receiver_email] + [cc_email] + [bcc_email]
 
 	# Add body to email
 	message.attach(MIMEText(body, "html"))
@@ -53,7 +57,7 @@ def send_mail(body):
 		server.starttls()	
 		server.ehlo()
 		server.login(sender_email, password)
-		server.sendmail(sender_email, receiver_email, text)
+		server.sendmail(sender_email, toaddrs, text)
 	except Exception as e:
 	    # Print any error messages to stdout
 	    write_output_to_file("Erreur: "+str(e))
