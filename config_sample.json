@@ -1,0 +1,19 @@
+{
+	"email":{
+		"port" : 587,
+		"smtpServer" : "mail0.test.com",
+		"senderEmail" : "hostmaster@test.fr",
+		"senderEmailToDisplay" : "oom@npe.fr",
+		"receiverEmail" : "giz@flubber.fr",
+		"ccEmail" : "olivier@supercool.fr",
+		"bccEmail" : "anonymous@h4ck.fr",
+		"password" : "***"
+	},
+	"freshbooks":{
+		"accountClientId":"gq4hj9r12otrlzb5gemro6dow7hk4uwhz0y075cwhmu43mpls3",
+		"accountClientSecret":"hjnojifd3rhdwu7j47yqoffahmlqv4az3q49ngc5ngd20c4vnm",
+		"businessId":"6254464",
+		"clientId":"1267722"
+	}
+
+}
