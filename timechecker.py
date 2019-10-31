@@ -11,6 +11,9 @@ def write_output_to_file(to_write):
 	with open("output.txt", "a+") as log_file:
 		log_file.write(to_write+"\n")
 
+with open('config.json', 'r') as f:
+    config_json = json.load(f)
+
 # Function that sends email
 def send_mail(body):
 	import smtplib, ssl
@@ -19,20 +22,23 @@ def send_mail(body):
 	from email.mime.text import MIMEText
 
 	# Server config
-	port = ***
-	smtp_server = "***"
-	sender_email = "***"  # Enter your address
-	receiver_email_to_display = "***"
-	receiver_email = "***"  # Enter receiver address
-	password = "***"
+	email_config = config_json["email"]
+	port = email_config["port"]
+	smtp_server = email_config["smtpServer"]
+	sender_email = email_config["senderEmail"]
+	sender_email_to_display = email_config["senderEmailToDisplay"]
+	receiver_email = email_config["receiverEmail"]
+	cc_email = email_config["ccEmail"]
+	password = email_config["password"]
 
 	# Email content
 	subject = "[inkOS] Weekly Summary Time Tracker"
 	
 	# Create a multipart message and set headers
 	message = MIMEMultipart()
-	message["From"] = "73kBot <"+receiver_email_to_display+">"
+	message["From"] = "73kBot <"+sender_email_to_display+">"
 	message["To"] = receiver_email
+	message['Cc'] = cc_email
 	message["Subject"] = subject
 
 	# Add body to email
@@ -55,7 +61,7 @@ def send_mail(body):
 	    exit()
 	finally:
 		server.quit()
-		write_output_to_file("73kBot sent a mail to "+ receiver_email + "\r\n")
+		write_output_to_file("73kBot sent a mail to "+receiver_email+"\r\n")
 
 # Function that save tokens to a file
 def save_token_to_file(token_access, token_refresh):
@@ -64,18 +70,19 @@ def save_token_to_file(token_access, token_refresh):
 		token_file.write(token_refresh)
 
 # Parameter check
-if len(sys.argv) < 3:
-	write_output_to_file("Missing parameters, usage: `$ python3.7 timechecker.py <client_id> <client_secret> [<code>]`")
-	exit()
+# if len(sys.argv) < 3:
+# 	write_output_to_file("Missing parameters, usage: `$ python3.7 timechecker.py <client_id> <client_secret> [<code>]`")
+# 	exit()
 
 # Get a real consumer key & secret from:
+freshbooks_config = config_json["freshbooks"]
 freshbooks = OAuth2Service(
-    client_id=sys.argv[1],
-    client_secret=sys.argv[2],
+    client_id=freshbooks_config["accountClientId"],
+    client_secret=freshbooks_config["accountClientSecret"],
     access_token_url='https://api.freshbooks.com/auth/oauth/token')
 
-if len(sys.argv) > 3:
-	code = sys.argv[3]
+if len(sys.argv) > 1:
+	code = sys.argv[1]
 	write_output_to_file("Given code:"+code)
 
 	# generate token
@@ -106,32 +113,33 @@ token = 'Bearer '+token_access
 write_output_to_file("Access TOKEN: "+token_access)
 write_output_to_file("Refresh TOKEN: "+token_refresh)
 
-# Only once a week on saturday morning before noon
-if datetime.datetime.today().weekday() != 5 or datetime.datetime.today().hour < 12:
-	exit()
-
-dt = datetime.datetime.today() - datetime.timedelta(7)
+# Work of the day last 24h
+dt = datetime.datetime.today() - datetime.timedelta(1)
 dt_string = dt.strftime("%Y-%m-%d")
 
 # Replace <businessId> <client-id>
-url = "https://api.freshbooks.com/timetracking/business/<businessId>/time_entries?client_id=<client-id>&page=0&started_from="+dt_string+"T04%3A00%3A00Z"
+url = "https://api.freshbooks.com/timetracking/business/"+freshbooks_config["businessId"]+"/time_entries?client_id="+freshbooks_config["clientId"]+"&page=0&started_from="+dt_string+"T04%3A00%3A00Z"
 headers = {'Authorization': token, 'Api-Version': 'alpha'}
 res = requests.get(url, data=None, headers=headers)
 
 # Mail to send
 total_hours_logged = round(res.json()["meta"]["total_logged"]/3600,2)
+if total_hours_logged <= 0:
+	write_output_to_file("Lazy dude you've done nothing today!")
+	exit()
+
 body = "Bonjour,<br/><br/>"
-body += "Voici le résumé du travail de la semaine fait par ***<br/><br/>"
+body += "Voici le résumé du travail du jour fait par inkOS<br/><br/>"
 
 body += "<ul>"
-for x in res.json()["time_entries"]:
-	duration = str(round(x["duration"]/3600,2))
-	write_output_to_file(x["note"]+": "+duration+"h")
-	body += "<li>"+x["note"]+": "+duration+"h</li>"
+for entry in res.json()["time_entries"]:
+	duration = str(round(entry["duration"]/3600,2))
+	write_output_to_file(entry["note"]+": "+duration+"h")
+	body += "<li>["+duration+"h] "+entry["note"]+"</li>"
 
 write_output_to_file("TOTAL:"+str(total_hours_logged))
 body += "</ul>"
-body += "TOTAL: "+str(total_hours_logged)+"h<br/>"
+body += "TOTAL: "+str(total_hours_logged)+"H<br/>"
 
 if total_hours_logged > 0:
 	send_mail(body)

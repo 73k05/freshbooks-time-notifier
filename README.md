@@ -3,7 +3,7 @@ Send notifications to yourself, coworkers or customers when a time entry has bee
 
 Once a week.
 
-The first time you launch the script on a machine, you'll need the code. Usage: `$ python3.7 timechecker.py <client_id> <client_secret> [<code>]`
+The first time you launch the script on a machine, you'll need the code. Usage: `$ python3.7 timechecker.py [<code>]`
 
 Change your smtp and client parameters in timechecker.py
 
